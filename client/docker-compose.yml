@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  app:
+    container_name: client
+    restart: always
+    build: ./
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./:/client
+    command: streamlit run main.py
