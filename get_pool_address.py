@@ -25,15 +25,17 @@ f = open('data/list_pool.csv', 'w')
 
 top_token_list = Instance.TOP_TOKEN
 
-for i in range(len(top_token_list)-1):
-    for j in range(i+1, len(top_token_list)-1):
-        address_1, address_2 = top_token_list[i][1], top_token_list[j][1]
-        symbol_1, symbol_2 = top_token_list[i][0], top_token_list[j][0]
+for i, (token1, token1_info) in enumerate(top_token_list.items()):
+    for j, (token2, token2_info) in enumerate(top_token_list.items()):
+        if i < j:
+            address_1, address_2 = token1_info['address'], token2_info['address']
 
-        # get contract address for each fee: 0.05%, 0.3%, 1%
-        for fee in Instance.UNISWAP_POOL_FEE:
-            address_contract = contract.functions.getPool(address_1, address_2, int(fee*10000)).call()
-            if address_contract != '0x0000000000000000000000000000000000000000':
-                
-                f.write('%s/%s/%g-%s\n'%(symbol_1, symbol_2, fee, address_contract))
+            # get contract address for each fee: 0.05%, 0.3%, 1%
+            for fee in Instance.UNISWAP_POOL_FEE:
+                address_contract = contract.functions.getPool(address_1, address_2, int(fee*10000)).call()
+                if address_contract != Instance.NULL_ADDRESS:
+                    token_balance_1 = utils.get_token_balance_of_contract(web3, token1, address_contract)
+                    token_balance_2 = utils.get_token_balance_of_contract(web3, token2, address_contract)
+                    if token_balance_1 > 100*(10**token1_info['decimal']) or token_balance_2 > 100*(10**token2_info['decimal']): # filter out small pool
+                        f.write('%s-%s-%g-%s\n'%(token1, token2, fee, address_contract))
 
