@@ -1,8 +1,5 @@
 Flask
 gunicorn
-Werkzeug
 python-dotenv
-sqlalchemy
-psycopg2
-pandas
 requests
+web3
